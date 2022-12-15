@@ -1,0 +1,77 @@
+class LimitPriceError(Exception):
+    """Створюємо клас для помилки, якщо встановили від`ємну або нульову вартість товару"""
+
+    def __init__(self, price):
+        self.price = price
+
+    def __str__(self):
+        if self.price < 0:
+            return 'The product`s price cannot be negative.'
+        elif self.price == 0:
+            return 'The product`s price cannot be zero.'
+
+class Goods:
+    """Створюємо клас Товари, визначаємо назву товару, ціну та вагу"""
+    def __init__(self, name: str, price: int, weight: int):
+        self.name = name
+        self.price = price
+        self.weight = weight
+
+        if price <= 0:
+            raise LimitPriceError(price)
+
+    def __str__(self):
+        """Функція повертає назву, ціну та вагу Товару"""
+        return f'Goods: {self.name}, price: {self.price} UAH, weight: {self.weight} g'
+
+goods_1 = Goods('bread', 25, 300)
+goods_2 = Goods('milk', 45, 500)
+goods_3 = Goods('banana', 60, 1000)
+
+class Buyer:
+    """Створюємо клас Покупець і визначаємо ім'я, прізвище та номер телефону Покупця"""
+    def __init__(self, name: str, surname: str, telephon: int):
+        self.name = name
+        self.surname = surname
+        self.telephon = telephon
+
+    def __str__(self):
+        """Функція повертає ім'я, прізвище та телефон Покупця"""
+        return f'Buyer: {self.name}, {self.surname}, telephon: {self.telephon}'
+
+buyer_1 = Buyer('Alexander', 'Tvix', 380675676545)
+buyer_2 = Buyer('Iryna', 'Mazur', 678764534)
+buyer_3 = Buyer('Blad', 'Nofer', 654356782)
+
+class Order:
+    """Створюємо клас Замовлення, визначаємо найменування, список замовлень та загальну вартість"""
+    def __init__(self, title: str):
+        self.title = title
+        self.order = []
+        self.total_amount = []
+
+    def add_order(self, good):
+        if good not in self.order:
+            self.order.append(good)
+            self.total_amount.append(good.price)
+
+    def __str__(self):
+        return f"{self.title}\n{'^' * 10}\n" + '\n'.join(map(str, self.order)) + '\n' + \
+               'Total: ' + f'{sum(map(int, self.total_amount))}' + ' UAH' + '\n'
+
+
+buyer_1_order = Order('Buyer_1_Order')
+buyer_1_order.add_order(goods_1)
+buyer_1_order.add_order(goods_2)
+print(buyer_1_order)
+
+buyer_2_order = Order('Buyer_2_Order')
+buyer_2_order.add_order(goods_2)
+buyer_2_order.add_order(goods_3)
+print(buyer_2_order)
+
+buyer_3_order = Order('Buyer_3_Order')
+buyer_3_order.add_order(goods_1)
+buyer_3_order.add_order(goods_2)
+buyer_3_order.add_order(goods_3)
+print(buyer_3_order)
