@@ -1,0 +1,140 @@
+#2. Модифікуйте Друге домашнє завдання так, щоб при спробі додавання до групи більше 10-ти студентів,
+викликалася виняткова ситуація (тип виняткової ситуації треба самостійно реалізувати).
+Подію додавання нового студента до групи необхідно фіксувати у лог-файлі.
+
+import logging
+logger = logging.getLogger('main.py')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+
+filehandler = logging.FileHandler('main.py')
+filehandler.setLevel(logging.DEBUG)
+filehandler.setFormatter(formatter)
+
+logger.addHandler(filehandler)
+
+if __name__ == '__main__':
+    logger.info('Started logging')
+    logger.warning('Started logging to log')
+    #logger.info('Finished logging')
+
+
+class LimitGroupError(Exception):
+    """Створюємо клас для помилки, якщо група повністю набрана"""
+    def __init__(self, max_limit):
+        self.max_limit = max_limit
+
+    def __str__(self):
+        return f'We have already full group - {self.max_limit} students.'
+
+class AmountStudentError(Exception):
+    """Створюємо клас для помилки, якщо такого студента вже додано до групи"""
+    def __init__(self, student, group_title):
+        self.student = student
+        self.group_title = group_title
+
+    def __str__(self):
+        return f'{self.student} is already registered in the {self.group_title}.'
+
+class Person:
+    """Створюємо клас Людина: им'я, по-батькові, прізвище, вік"""
+
+    def __init__(self, name: str, second_name: str, surname: str, age: int):
+        self.name = name
+        self.second_name = second_name
+        self.surname = surname
+        self.age = age
+
+    def print_name(self):
+        """Функція виведення ПІБ особи"""
+        return f'{self.name} {self.second_name} {self.surname}'
+
+    def print_age(self):
+        """Функція виведення віку особи"""
+        return f'Age: {self.age} years old'
+
+    def __str__(self):
+        """Функція виведення загального опису особи"""
+        return f'{self.name} {self.second_name} {self.surname}, age: {self.age} years old'
+
+class Student(Person):
+    """На базі класу Людина створюємо клас Студент: додаємо назву університету і факультету"""
+    def __init__(self, name, second_name, surname, age, university: str, faculty: str):
+        super().__init__(name, second_name, surname, age)
+        self.university = university
+        self.faculty = faculty
+
+    def print_university(self):
+        """Функція виведення університету, де навчається студент"""
+        return f'University: {self.university}'
+
+    def print_faculty(self):
+        """Функція виведення факультету, де навчається студент"""
+        return f'Faculty: {self.faculty}'
+
+    def __str__(self):
+        """Функція виведення загального опису студента"""
+        return "Student: " + super().__str__() + ',' + " university is {}, faculty is {}".format(self.university,\
+                                                                                                 self.faculty)
+
+class Group:
+    """Створюємо клас група студентів,
+    встановлюємо максимальний розмір групи"""
+
+    def __init__(self, title: str, max_students: int = 10):
+        self.title = title
+        self.list_students = []
+        self.max_students = max_students
+
+    def add_student(self, student: Student):
+        """Функція додавання студентів з перевіркою чи є вже такий студент у групі і чи є ще місце в групі"""
+        if student in self.list_students:
+            raise AmountStudentError(student, self.title)
+        if len(self.list_students) >= self.max_students:
+            raise LimitGroupError(self.max_students)
+
+        self.list_students.append(student)
+
+    def delete_student(self, student: Student):
+        """Функція видалення студента з групи"""
+        if student in self.list_students:
+            self.list_students.remove(student)
+
+    def find_student(self, surname: str):
+        """Функція пошуку студента за прізвищем і додавання у список"""
+        res = []
+        for student in self.list_students:
+            if student.surname == surname:
+                res.append(student)
+        return res
+
+    def __str__(self):
+        """Функція виведення групи студентів"""
+        return f"{self.title}\n{'^' * 13}\n" + '\n'.join(map(str, self.list_students)) + '\n'
+
+student_1 = Student('Alexander', "Yurievich", 'Tvix', 18, 'UNI', "law")
+student_2 = Student('Iryna', 'Victorivna', 'Mazur', 19, 'UNI', 'economic')
+student_3 = Student('Vlad', 'Olegovich', 'Nofer', 26, 'UNI', 'veterinary')
+student_4 = Student('Olha', 'Yurievna', 'Bryk', 23, 'UNI', 'mechanic')
+student_5 = Student('Dmitriy', "Vasilievich", 'Acunin', 18, 'UNI', 'law')
+student_6 = Student('Maryna', 'Victorivna', 'Tvix', 19, 'UNI', 'economic')
+student_7 = Student('Anna', 'Olexandrivna', 'Mon', 20, 'UNI', 'veterinary')
+student_8 = Student('Kira', 'Viktorivna', 'Longer', 18, 'UNI', 'mechanic')
+student_9 = Student('Kira', 'Viktorivna', 'Longer', 18, 'UNI', 'mechanic')
+student_10 = Student('Kateryna', 'Ivanivna', 'Lotr', 19, 'UNI', 'economic')
+student_11 = Student('Valeriy', 'Dmitrievich', 'Lif', 28, 'UNI', 'law')
+
+group_english = Group('English group')
+group_english.add_student(student_1)
+group_english.add_student(student_2)
+group_english.add_student(student_3)
+group_english.add_student(student_4)
+group_english.add_student(student_5)
+group_english.add_student(student_6)
+group_english.add_student(student_7)
+group_english.add_student(student_8)
+group_english.add_student(student_9)
+group_english.add_student(student_10)
+
+
+print(group_english)
